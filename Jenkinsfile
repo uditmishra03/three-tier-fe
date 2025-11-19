@@ -19,8 +19,8 @@ pipeline {
                 dir('frontend') {
                     withSonarQubeEnv('sonar-server') {
                         sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName=three-tier-frontend \
-                        -Dsonar.projectKey=three-tier-frontend '''
+                        -Dsonar.projectName=three-tier-fe \
+                        -Dsonar.projectKey=three-tier-fe '''
                     }
                 }
                 script {

@@ -14,11 +14,6 @@ pipeline {
         IMAGE_TAG = "${new Date().format('yyyyMMdd')}-${BUILD_NUMBER}"
     }
     stages {
-        stage('Cleaning Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
         stage('Sonarqube Analysis & Quality Check') {
             steps {
                 dir('frontend') {
@@ -83,6 +78,9 @@ pipeline {
         }
     }
     post {
+        always {
+            cleanWs()
+        }
         success {
             echo "Pipeline completed successfully!"
             echo "Frontend image pushed to ECR: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG}"

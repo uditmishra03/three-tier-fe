@@ -5,6 +5,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Deployed from three-tier-fe repository */
+    border-top: 3px solid #00ff88;
 }
 
 .container {

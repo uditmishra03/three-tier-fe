@@ -10,6 +10,8 @@ pipeline {
         AWS_ECR_REPO_NAME = credentials('ECR_REPO01')
         AWS_DEFAULT_REGION = 'us-east-1'
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
+        // Date-based semantic versioning: YYYYMMDD-BUILD (e.g., 20241120-1)
+        IMAGE_TAG = "${new Date().format('yyyyMMdd')}-${BUILD_NUMBER}"
     }
     stages {
         stage('Cleaning Workspace') {
@@ -17,14 +19,9 @@ pipeline {
                 cleanWs()
             }
         }
-        stage('Checkout from Git') {
-            steps {
-                git credentialsId: 'GITHUB', url: 'https://github.com/uditmishra03/End-to-End-Kubernetes-Three-Tier-DevSecOps-Project.git'
-            }
-        }
         stage('Sonarqube Analysis & Quality Check') {
             steps {
-                dir('Application-Code/frontend') {
+                dir('frontend') {
                     withSonarQubeEnv('sonar-server') {
                         sh ''' $SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectName=three-tier-frontend \
@@ -50,7 +47,7 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        dir('Application-Code/frontend') {
+                        dir('frontend') {
                             sh 'trivy fs . > trivyfs.txt'
                         }
                     }
@@ -60,7 +57,7 @@ pipeline {
         stage("Docker Image Build & Push with Buildx") {
             steps {
                 script {
-                    dir('Application-Code/frontend') {
+                    dir('frontend') {
                         sh 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}'
                         sh '''
                             # Create builder if it doesn't exist
@@ -70,7 +67,7 @@ pipeline {
                                 docker buildx use mybuilder
                             fi
                         '''
-                        sh 'docker buildx build --platform linux/amd64 -t ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER} --push .'
+                        sh 'docker buildx build --platform linux/amd64 -t ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG} --push .'
                     }
                 }
             }
@@ -79,7 +76,7 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh 'trivy image ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER} > trivyimage.txt'
+                        sh 'trivy image ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG} > trivyimage.txt'
                     }
                 }
             }
@@ -88,7 +85,7 @@ pipeline {
     post {
         success {
             echo "Pipeline completed successfully!"
-            echo "Frontend image pushed to ECR: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}"
+            echo "Frontend image pushed to ECR: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG}"
             echo "ArgoCD Image Updater will automatically detect and deploy the new image"
         }
     }

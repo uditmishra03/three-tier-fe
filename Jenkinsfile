@@ -16,12 +16,10 @@ pipeline {
     stages {
         stage('Sonarqube Analysis & Quality Check') {
             steps {
-                dir('frontend') {
-                    withSonarQubeEnv('sonar-server') {
-                        sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName=three-tier-fe \
-                        -Dsonar.projectKey=three-tier-fe '''
-                    }
+                withSonarQubeEnv('sonar-server') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectName=three-tier-fe \
+                    -Dsonar.projectKey=three-tier-fe '''
                 }
                 script {
                     timeout(time: 5, unit: 'MINUTES') {
@@ -42,9 +40,7 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        dir('frontend') {
-                            sh 'trivy fs . > trivyfs.txt'
-                        }
+                        sh 'trivy fs . > trivyfs.txt'
                     }
                 }
             }
@@ -52,18 +48,16 @@ pipeline {
         stage("Docker Image Build & Push with Buildx") {
             steps {
                 script {
-                    dir('frontend') {
-                        sh 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}'
-                        sh '''
-                            # Create builder if it doesn't exist
-                            if ! docker buildx inspect mybuilder > /dev/null 2>&1; then
-                                docker buildx create --name mybuilder --use --bootstrap
-                            else
-                                docker buildx use mybuilder
-                            fi
-                        '''
-                        sh 'docker buildx build --platform linux/amd64 -t ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG} --push .'
-                    }
+                    sh 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}'
+                    sh '''
+                        # Create builder if it doesn't exist
+                        if ! docker buildx inspect mybuilder > /dev/null 2>&1; then
+                            docker buildx create --name mybuilder --use --bootstrap
+                        else
+                            docker buildx use mybuilder
+                        fi
+                    '''
+                    sh 'docker buildx build --platform linux/amd64 -t ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG} --push .'
                 }
             }
         }

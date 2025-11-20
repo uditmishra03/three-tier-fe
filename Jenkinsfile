@@ -1,4 +1,5 @@
 // Frontend Pipeline - Testing webhook trigger
+// Test: Verify auto-update with zero-padded tags (20251120)
 pipeline {
     agent any 
     tools {
@@ -74,25 +75,13 @@ pipeline {
         }
     }
     post {
-        always {
-            script {
-                try {
-                    cleanWs()
-                } catch (Exception e) {
-                    echo "Workspace cleanup skipped: ${e.message}"
-                }
-            }
-        }
         success {
-            script {
-                try {
-                    echo "Pipeline completed successfully!"
-                    echo "Frontend image pushed to ECR: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG}"
-                    echo "ArgoCD Image Updater will automatically detect and deploy the new image"
-                } catch (Exception e) {
-                    echo "Pipeline completed successfully!"
-                }
-            }
+            echo "Pipeline completed successfully!"
+            echo "Frontend image built and pushed to ECR"
+            echo "ArgoCD Image Updater will automatically detect and deploy the new image"
+        }
+        failure {
+            echo "Pipeline failed. Please check the logs for details."
         }
     }
 }

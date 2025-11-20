@@ -11,8 +11,9 @@ pipeline {
         AWS_ECR_REPO_NAME = credentials('ECR_REPO01')
         AWS_DEFAULT_REGION = 'us-east-1'
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
-        // Date-based semantic versioning: YYYYMMDD-BUILD (e.g., 20241120-1)
-        IMAGE_TAG = "${new Date().format('yyyyMMdd')}-${BUILD_NUMBER}"
+        // Date-based semantic versioning: YYYYMMDD-BUILD (e.g., 20241120-001)
+        // Zero-padded to 3 digits to ensure proper lexicographic sorting
+        IMAGE_TAG = "${new Date().format('yyyyMMdd')}-${String.format('%03d', BUILD_NUMBER.toInteger())}"
     }
     stages {
         stage('Sonarqube Analysis & Quality Check') {

@@ -75,12 +75,24 @@ pipeline {
     }
     post {
         always {
-            cleanWs()
+            script {
+                try {
+                    cleanWs()
+                } catch (Exception e) {
+                    echo "Workspace cleanup skipped: ${e.message}"
+                }
+            }
         }
         success {
-            echo "Pipeline completed successfully!"
-            echo "Frontend image pushed to ECR: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG}"
-            echo "ArgoCD Image Updater will automatically detect and deploy the new image"
+            script {
+                try {
+                    echo "Pipeline completed successfully!"
+                    echo "Frontend image pushed to ECR: ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${IMAGE_TAG}"
+                    echo "ArgoCD Image Updater will automatically detect and deploy the new image"
+                } catch (Exception e) {
+                    echo "Pipeline completed successfully!"
+                }
+            }
         }
     }
 }

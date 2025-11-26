@@ -6,7 +6,7 @@
 
 .App {
     text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #556B2F 0%, #808000 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -31,11 +31,11 @@
     font-weight: 600;
     letter-spacing: 1px;
     padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #556B2F 0%, #808000 100%);
     color: white;
     border-radius: 16px;
     margin-bottom: 30px;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 20px rgba(85, 107, 47, 0.4);
 }
 
 .flex {

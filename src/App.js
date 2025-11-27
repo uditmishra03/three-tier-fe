@@ -9,6 +9,7 @@ class App extends Tasks {
         return (
             <div className="App">
                 <Paper elevation={3} className="container">
+                    <div className="demo-banner">🚀 DevSecOps Demo - CI/CD Pipeline Active</div>
                     <div className="heading">My TO-DO List</div>
                     <form
                         onSubmit={this.handleSubmit}
